@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3015:3015"
+    environment:
+      - NODE_ENV=production
+    container_name: arc-os-portfolio
+    restart: unless-stopped
