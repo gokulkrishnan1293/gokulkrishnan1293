@@ -10,7 +10,7 @@ welcome:
   sketchLine: "Every impossible idea begins as an unfinished sketch."
 
 modeChoice:
-  prompt: "How do you want to see the workshop?"
+  prompt: "How do you want to see the workspace?"
   tour: "Take the tour"
   tourSub: "the story, scroll-driven · ~3 min"
   overview: "Turn on the lights"

@@ -21,6 +21,18 @@ retro:
   couldImprove:
     - "Underestimated eval effort — should have built the harness before the agent"
     - "Too much prompt logic lived in code at first; moved it to versioned config late"
+# media — optional folders shown on the monitor's project screen.
+# Host images and videos on Cloudflare (R2 public bucket / Stream) and
+# paste the public URLs. Videos stream on demand (preload=none) —
+# nothing downloads until the visitor presses play.
+# media:
+#   architecture:
+#     - img: https://media.<your-domain>/claims/architecture.png
+#       caption: "stage agents + approval gate"
+#   videos:
+#     - src: https://media.<your-domain>/claims/demo.mp4
+#       title: "60s demo"
+#       poster: https://media.<your-domain>/claims/demo-poster.jpg
 ---
 
 ## The problem

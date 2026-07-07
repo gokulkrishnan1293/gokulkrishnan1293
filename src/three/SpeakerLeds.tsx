@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { L } from "@/experience/timeline";
 
 /**
@@ -15,7 +15,7 @@ export function SpeakerLeds() {
   const color = useRef(new THREE.Color());
 
   useFrame((state) => {
-    const { phase, audioOn, mode } = useWorkshop.getState();
+    const { phase, audioOn, mode } = useWorkspace.getState();
     const on = phase === "ready" || mode === "overview";
     const t = state.clock.elapsedTime;
     // slow hue drift; faster + brighter when audio is on

@@ -35,6 +35,23 @@ export interface SkillGroup {
   items: { name: string; ext: string }[];
 }
 
+export interface ProjectVideo {
+  /** absolute URL (Cloudflare R2/Stream, …) or a /public path */
+  src: string;
+  title: string;
+  poster?: string;
+}
+
+export interface ProjectDiagram {
+  img: string;
+  caption?: string;
+}
+
+export interface ProjectMedia {
+  architecture?: ProjectDiagram[];
+  videos?: ProjectVideo[];
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -47,6 +64,7 @@ export interface Project {
   stack: string[];
   sketch: string[];
   retro: { wentWell: string[]; couldImprove: string[] };
+  media?: ProjectMedia;
   body: string;
 }
 

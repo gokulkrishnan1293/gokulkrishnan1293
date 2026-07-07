@@ -1,5 +1,5 @@
 import { Html } from "@react-three/drei";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { L } from "@/experience/timeline";
 import { copy, projects } from "@/content";
 
@@ -13,7 +13,7 @@ const SHARP = 2; // 2× DOM resolution, scaled down — keeps text crisp when la
 
 export function WhiteboardSurface() {
   // content appears only once the visitor is inside the room
-  const visible = useWorkshop(
+  const visible = useWorkspace(
     (s) => s.phase === "ready" && (s.mode === "overview" || s.progress > 0.08),
   );
   if (!visible) return null;
@@ -34,7 +34,7 @@ export function WhiteboardSurface() {
 }
 
 function BoardUI() {
-  const activeProjectId = useWorkshop((s) => s.activeProjectId);
+  const activeProjectId = useWorkspace((s) => s.activeProjectId);
   const project = activeProjectId ? projects.find((p) => p.id === activeProjectId) : null;
 
   return (

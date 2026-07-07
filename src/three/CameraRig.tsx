@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
+import { lookInput } from "@/state/lookInput";
 import {
   sampleCamera,
   clamp01,
@@ -33,10 +34,14 @@ export function CameraRig() {
   /** wheel dolly: 1 = the wide shot, smaller = closer to the desk */
   const zoom = useRef(1);
   const zoomDir = useRef(new THREE.Vector3());
+  /** orb-driven pan, accumulated while the orb is held (overview / seated) */
+  const orbLook = useRef({ x: 0, y: 0 });
+  /** orb-driven lean during the tour — springs back on release */
+  const lean = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
-      const s = useWorkshop.getState();
+      const s = useWorkspace.getState();
       if (s.phase !== "ready" || s.mode !== "overview" || s.seated || s.viewLocked || s.overlay) return;
       zoom.current = Math.min(1.45, Math.max(0.42, zoom.current + e.deltaY * 0.0012));
     };
@@ -46,7 +51,7 @@ export function CameraRig() {
 
   useFrame((state, delta) => {
     const { progress, mode, seated, phase, viewLocked, activeProjectId, enteredAt, finishEnter } =
-      useWorkshop.getState();
+      useWorkspace.getState();
     const t = target.current;
 
     if (phase !== "ready") {
@@ -70,20 +75,18 @@ export function CameraRig() {
     } else if (mode === "overview") {
       if (seated) {
         // in the chair: a gentle glance around the working position
+        const o = orbLook.current;
+        o.x = THREE.MathUtils.clamp(o.x + lookInput.x * delta * 0.9, -0.55, 0.55);
+        o.y = THREE.MathUtils.clamp(o.y + lookInput.y * delta * 0.6, -0.35, 0.35);
         t.pos.copy(SEATED_CAM.pos);
-        t.look.set(
-          SEATED_CAM.look.x + state.pointer.x * 0.55,
-          SEATED_CAM.look.y + state.pointer.y * 0.35,
-          SEATED_CAM.look.z,
-        );
+        t.look.set(SEATED_CAM.look.x + o.x, SEATED_CAM.look.y + o.y, SEATED_CAM.look.z);
         t.fov = SEATED_CAM.fov;
       } else if (!viewLocked) {
-        // free look: the gaze follows the mouse, the wheel walks you in
-        t.look.set(
-          OVERVIEW_CAM.look.x + state.pointer.x * 2.0,
-          OVERVIEW_CAM.look.y + state.pointer.y * 1.15,
-          OVERVIEW_CAM.look.z,
-        );
+        // free look: hold the orb to pan the gaze, the wheel walks you in
+        const o = orbLook.current;
+        o.x = THREE.MathUtils.clamp(o.x + lookInput.x * delta * 2.4, -2.0, 2.0);
+        o.y = THREE.MathUtils.clamp(o.y + lookInput.y * delta * 1.6, -1.15, 1.15);
+        t.look.set(OVERVIEW_CAM.look.x + o.x, OVERVIEW_CAM.look.y + o.y, OVERVIEW_CAM.look.z);
         zoomDir.current.copy(OVERVIEW_CAM.pos).sub(OVERVIEW_CAM.look);
         t.pos.copy(OVERVIEW_CAM.look).addScaledVector(zoomDir.current, zoom.current);
         t.fov = OVERVIEW_CAM.fov;
@@ -103,9 +106,18 @@ export function CameraRig() {
         t.look.copy(sample.look);
         t.fov = sample.fov;
       }
-      // the gaze leans with the cursor at every beat of the tour
-      t.look.x += state.pointer.x * 0.14;
-      t.look.y += state.pointer.y * 0.09;
+      // the gaze leans while the orb is held, and settles back on release
+      const l = lean.current;
+      if (lookInput.active) {
+        l.x = THREE.MathUtils.clamp(l.x + lookInput.x * delta * 0.4, -0.16, 0.16);
+        l.y = THREE.MathUtils.clamp(l.y + lookInput.y * delta * 0.28, -0.1, 0.1);
+      } else {
+        const d = Math.exp(-2.5 * delta);
+        l.x *= d;
+        l.y *= d;
+      }
+      t.look.x += l.x;
+      t.look.y += l.y;
       // breathing: tiny idle drift so held shots stay alive
       const time = state.clock.elapsedTime;
       t.pos.x += Math.sin(time * 0.4) * 0.008;

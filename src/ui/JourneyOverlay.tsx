@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { SCENES, PEAK_X, PEAK_Y, range, smooth, clamp01 } from "@/experience/timeline";
 import { copy, journey } from "@/content";
 
@@ -15,10 +15,10 @@ import { copy, journey } from "@/content";
  * Also serves as a browsable overlay in Overview (click the frame).
  */
 export function JourneyOverlay() {
-  const progress = useWorkshop((s) => s.progress);
-  const mode = useWorkshop((s) => s.mode);
-  const overlay = useWorkshop((s) => s.overlay);
-  const openOverlay = useWorkshop((s) => s.openOverlay);
+  const progress = useWorkspace((s) => s.progress);
+  const mode = useWorkspace((s) => s.mode);
+  const overlay = useWorkspace((s) => s.overlay);
+  const openOverlay = useWorkspace((s) => s.openOverlay);
 
   const browsing = mode === "overview" && overlay?.kind === "philosophy";
 

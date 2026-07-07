@@ -1,14 +1,14 @@
 ---
-title: The Workshop (this site)
+title: The Workspace (this site)
 featured: false
 order: 4
 status: building
 period: "2026"
 card:
-  label: WORKSHOP
+  label: WORKSPACE
   color: "#b06fb0"
   media: sd
-summary: This portfolio — a 3D workshop that sketches itself in as you scroll. Content lives in git; the room redraws from data.
+summary: This portfolio — a 3D workspace that sketches itself in as you scroll. Content lives in git; the room redraws from data.
 stack: [React, React Three Fiber, TypeScript, Tailwind, Zustand]
 sketch:
   - "Scroll is the film reel; clicks are optional depth"

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { SCENES, ENTRY_P } from "@/experience/timeline";
 import { Experience } from "@/three/Experience";
 import { DoorGate } from "@/ui/DoorGate";
@@ -8,14 +8,15 @@ import { ModeChoice } from "@/ui/ModeChoice";
 import { JourneyOverlay } from "@/ui/JourneyOverlay";
 import { ReadingPanel } from "@/ui/ReadingPanel";
 import { SceneCaptions } from "@/ui/SceneCaptions";
+import { LookOrb } from "@/ui/LookOrb";
 import { useAmbientAudio } from "@/ui/useAmbientAudio";
 
 /** Total scroll length of the tour, in viewport-heights. */
 const TRACK_VH = 900;
 
 export function App() {
-  const phase = useWorkshop((s) => s.phase);
-  const mode = useWorkshop((s) => s.mode);
+  const phase = useWorkspace((s) => s.phase);
+  const mode = useWorkspace((s) => s.mode);
   const trackRef = useRef<HTMLDivElement>(null);
 
   useAmbientAudio();
@@ -23,7 +24,7 @@ export function App() {
   // scroll → progress
   useEffect(() => {
     const onScroll = () => {
-      const s = useWorkshop.getState();
+      const s = useWorkspace.getState();
       if (s.phase !== "ready" || s.mode !== "tour") return;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
@@ -60,7 +61,7 @@ export function App() {
   // the walk-in ends at ENTRY_P — park the scroll there so the tour picks
   // up seamlessly and scrolling backward walks you back out the door
   useEffect(() => {
-    if (phase !== "ready" || useWorkshop.getState().mode !== "tour") return;
+    if (phase !== "ready" || useWorkspace.getState().mode !== "tour") return;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     window.scrollTo({ top: max * ENTRY_P });
   }, [phase]);
@@ -78,6 +79,7 @@ export function App() {
           <ModeChoice />
           <JourneyOverlay />
           <Hud />
+          <LookOrb />
           <ReadingPanel />
         </>
       )}

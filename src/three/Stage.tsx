@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { L, reveal, type Section } from "@/experience/timeline";
 import { useNormalizedModel } from "./useNormalizedModel";
 import { Sketchable } from "./Sketchable";
@@ -19,7 +19,7 @@ function useRevealOpacity(section: Section, max = 1) {
   const ref = useRef<THREE.MeshStandardMaterial>(null);
   useFrame(() => {
     if (!ref.current) return;
-    const { progress, mode } = useWorkshop.getState();
+    const { progress, mode } = useWorkspace.getState();
     const r = reveal(section, progress, mode === "overview");
     ref.current.opacity = r * max;
   });
@@ -39,7 +39,7 @@ function Monitor() {
 function Speaker({ side }: { side: "L" | "R" }) {
   const model = useNormalizedModel("/models/speaker.glb", 0.3, { axis: "y" });
   const pos = side === "L" ? L.speakerL : L.speakerR;
-  const toggleAudio = useWorkshop((s) => s.toggleAudio);
+  const toggleAudio = useWorkspace((s) => s.toggleAudio);
   return (
     <Sketchable
       model={model}
@@ -73,7 +73,7 @@ function Couple() {
 
 function Chair() {
   const model = useNormalizedModel("/models/chair.glb", 1.05, { axis: "y", rotateY: Math.PI });
-  const isOverview = useWorkshop((s) => s.mode === "overview");
+  const isOverview = useWorkspace((s) => s.mode === "overview");
   const group = useRef<THREE.Group>(null);
   // once the lights are on the chair spins: drag to give it a push,
   // a plain click (no drag) still sits you down
@@ -96,7 +96,7 @@ function Chair() {
       s.dragging = false;
       if (s.moved < 6) {
         s.vel = 0;
-        useWorkshop.getState().sit(true);
+        useWorkspace.getState().sit(true);
       }
     };
     window.addEventListener("pointermove", onMove);
@@ -160,8 +160,8 @@ function PanoramaFrame() {
     align: "center",
   });
   const texture = useTexture("/img/mountain-range.png");
-  const openOverlay = useWorkshop((s) => s.openOverlay);
-  const isOverview = useWorkshop((s) => s.mode === "overview");
+  const openOverlay = useWorkspace((s) => s.openOverlay);
+  const isOverview = useWorkspace((s) => s.mode === "overview");
   return (
     <group>
       <Sketchable

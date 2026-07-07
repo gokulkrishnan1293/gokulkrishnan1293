@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { reveal, type Section } from "@/experience/timeline";
 
 /**
@@ -52,7 +52,7 @@ export function Sketchable({
   const visRef = useRef<THREE.Group>(null);
 
   useFrame(() => {
-    const { progress, mode } = useWorkshop.getState();
+    const { progress, mode } = useWorkspace.getState();
     const r = reveal(section, progress, mode === "overview");
 
     if (visRef.current) visRef.current.visible = r > 0.005;

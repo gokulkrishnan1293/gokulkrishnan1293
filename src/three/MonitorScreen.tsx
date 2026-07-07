@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Html } from "@react-three/drei";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { L, screenModeAt, type ScreenMode } from "@/experience/timeline";
-import { copy, now, profile, projects, skills } from "@/content";
+import { copy, now, profile, projects, skills, type ProjectDiagram, type ProjectVideo } from "@/content";
 
 /**
  * The monitor is one coherent mini-OS: welcome → file explorer (skills) →
@@ -18,7 +18,7 @@ const PX = 0.04;
 const SHARP = 2;
 
 export function MonitorScreen() {
-  const phase = useWorkshop((s) => s.phase);
+  const phase = useWorkspace((s) => s.phase);
   // lit from the moment the door hangs ajar — the glow that pulls you in
   const on = phase !== "loading";
 
@@ -50,9 +50,9 @@ export function MonitorScreen() {
 }
 
 function ScreenUI() {
-  const progress = useWorkshop((s) => s.progress);
-  const mode = useWorkshop((s) => s.mode);
-  const activeProjectId = useWorkshop((s) => s.activeProjectId);
+  const progress = useWorkspace((s) => s.progress);
+  const mode = useWorkspace((s) => s.mode);
+  const activeProjectId = useWorkspace((s) => s.activeProjectId);
   const screen = screenModeAt(progress, mode, activeProjectId);
 
   return (
@@ -108,7 +108,7 @@ function WelcomeScreen() {
           <span className="cursor-blink text-[#ffb454]">▌</span>
         </div>
         <div className="mt-5 text-[12px] italic text-[#9a958a]">“{copy.welcome.sketchLine}”</div>
-        <div className="mt-4 text-[11px] text-[#6c675e]">scroll to step into the workshop ↓</div>
+        <div className="mt-4 text-[11px] text-[#6c675e]">scroll to step into the workspace ↓</div>
       </div>
     </div>
   );
@@ -165,16 +165,23 @@ function SkillsExplorer() {
 
 function ProjectScreen({ id }: { id: string }) {
   const project = projects.find((p) => p.id === id);
-  const openOverlay = useWorkshop((s) => s.openOverlay);
-  const plugCard = useWorkshop((s) => s.plugCard);
+  const openOverlay = useWorkspace((s) => s.openOverlay);
+  const plugCard = useWorkspace((s) => s.plugCard);
+  const [folder, setFolder] = useState<"architecture" | "demo" | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    setFolder(null);
     ref.current?.scrollTo({ top: 0 });
   }, [id]);
   if (!project) return <DimScreen />;
+  const diagrams = project.media?.architecture ?? [];
+  const videos = project.media?.videos ?? [];
   return (
     <div className="relative flex h-full flex-col">
-      <TitleBar title={`card://${project.card.label.toLowerCase()}`} dotColor={project.card.color} />
+      <TitleBar
+        title={`card://${project.card.label.toLowerCase()}${folder ? `/${folder}` : ""}`}
+        dotColor={project.card.color}
+      />
       <button
         onClick={() => plugCard(null)}
         className="absolute top-1 right-2 rounded px-2 py-1 text-[11px] text-[#6c675e] hover:text-[#e8e4da]"
@@ -182,26 +189,112 @@ function ProjectScreen({ id }: { id: string }) {
       >
         ⏏ eject
       </button>
+      {folder !== null && (
+        <button
+          onClick={() => setFolder(null)}
+          className="absolute top-1 right-16 rounded px-2 py-1 text-[11px] text-[#6c675e] hover:text-[#e8e4da]"
+        >
+          ◂ back
+        </button>
+      )}
       <div ref={ref} className="panel-scroll min-h-0 flex-1 overflow-y-auto p-5">
-        <div className="text-[19px] leading-snug text-[#f0ead9]">{project.title}</div>
-        <div className="mt-0.5 text-[11px] text-[#9a958a]">
-          {project.period} · {project.status}
-        </div>
-        <p className="mt-3 text-[12.5px] leading-relaxed text-[#c9c4b6]">{project.summary}</p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {project.stack.map((s) => (
-            <span key={s} className="rounded border border-[#ffffff1c] px-1.5 py-0.5 text-[10px] text-[#b8b3a6]">
-              {s}
-            </span>
+        {folder === "architecture" ? (
+          <ArchitectureFolder diagrams={diagrams} />
+        ) : folder === "demo" ? (
+          <DemoFolder videos={videos} />
+        ) : (
+          <>
+            <div className="text-[19px] leading-snug text-[#f0ead9]">{project.title}</div>
+            <div className="mt-0.5 text-[11px] text-[#9a958a]">
+              {project.period} · {project.status}
+            </div>
+            <p className="mt-3 text-[12.5px] leading-relaxed text-[#c9c4b6]">{project.summary}</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {project.stack.map((s) => (
+                <span key={s} className="rounded border border-[#ffffff1c] px-1.5 py-0.5 text-[10px] text-[#b8b3a6]">
+                  {s}
+                </span>
+              ))}
+            </div>
+            {(diagrams.length > 0 || videos.length > 0) && (
+              <div className="mt-4 flex gap-2">
+                {diagrams.length > 0 && (
+                  <button
+                    onClick={() => setFolder("architecture")}
+                    className="rounded border border-[#ffffff1c] px-2.5 py-1.5 text-[11.5px] text-[#b8b3a6] hover:border-[#6f87a866] hover:text-[#d8d4c8]"
+                  >
+                    🗀 architecture/ <span className="text-[#5b564d]">{diagrams.length}</span>
+                  </button>
+                )}
+                {videos.length > 0 && (
+                  <button
+                    onClick={() => setFolder("demo")}
+                    className="rounded border border-[#ffffff1c] px-2.5 py-1.5 text-[11.5px] text-[#b8b3a6] hover:border-[#6f87a866] hover:text-[#d8d4c8]"
+                  >
+                    🗀 demo/ <span className="text-[#5b564d]">{videos.length}</span>
+                  </button>
+                )}
+              </div>
+            )}
+            <button
+              onClick={() => openOverlay({ kind: "project", id })}
+              className="mt-4 rounded border border-[#ffb45455] px-3 py-1.5 text-[11.5px] text-[#ffb454] hover:bg-[#ffb45415]"
+            >
+              open full case study →
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ArchitectureFolder({ diagrams }: { diagrams: ProjectDiagram[] }) {
+  return (
+    <div className="space-y-4">
+      {diagrams.map((d) => (
+        <figure key={d.img}>
+          <img src={d.img} alt={d.caption ?? "architecture diagram"} className="w-full rounded border border-[#ffffff12] bg-[#0b0c10]" />
+          {d.caption && <figcaption className="mt-1 text-[10.5px] text-[#9a958a]">{d.caption}</figcaption>}
+        </figure>
+      ))}
+    </div>
+  );
+}
+
+function DemoFolder({ videos }: { videos: ProjectVideo[] }) {
+  const [active, setActive] = useState(0);
+  const video = videos[Math.min(active, videos.length - 1)];
+  return (
+    <div className="flex h-full flex-col">
+      {/* preload=none: nothing streams until the visitor presses play */}
+      <video
+        key={video.src}
+        controls
+        playsInline
+        preload="none"
+        poster={video.poster}
+        src={video.src}
+        className="max-h-[205px] w-full rounded bg-black"
+      />
+      <div className="mt-1.5 text-[11px] text-[#9a958a]">{video.title}</div>
+      {videos.length > 1 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {videos.map((v, i) => (
+            <button
+              key={v.src}
+              onClick={() => setActive(i)}
+              className={`rounded border px-2 py-1 text-[10.5px] ${
+                i === active
+                  ? "border-[#ffb45455] text-[#ffb454]"
+                  : "border-[#ffffff1c] text-[#b8b3a6] hover:text-[#d8d4c8]"
+              }`}
+            >
+              ▶ {v.title}
+            </button>
           ))}
         </div>
-        <button
-          onClick={() => openOverlay({ kind: "project", id })}
-          className="mt-4 rounded border border-[#ffb45455] px-3 py-1.5 text-[11.5px] text-[#ffb454] hover:bg-[#ffb45415]"
-        >
-          open full case study →
-        </button>
-      </div>
+      )}
     </div>
   );
 }

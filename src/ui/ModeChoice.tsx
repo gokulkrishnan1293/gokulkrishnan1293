@@ -1,4 +1,4 @@
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { SCENES, range } from "@/experience/timeline";
 import { copy } from "@/content";
 
@@ -7,9 +7,9 @@ import { copy } from "@/content";
  * It never blocks — scrolling straight past it simply continues the film.
  */
 export function ModeChoice() {
-  const progress = useWorkshop((s) => s.progress);
-  const mode = useWorkshop((s) => s.mode);
-  const setMode = useWorkshop((s) => s.setMode);
+  const progress = useWorkspace((s) => s.progress);
+  const mode = useWorkspace((s) => s.mode);
+  const setMode = useWorkspace((s) => s.setMode);
 
   if (mode !== "tour") return null;
   const { start, end } = SCENES.modeChoice;

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { failures, projects } from "@/content";
 import { copy } from "@/content";
 
@@ -8,8 +8,8 @@ import { copy } from "@/content";
  * Handles project case studies and shelf postmortems.
  */
 export function ReadingPanel() {
-  const overlay = useWorkshop((s) => s.overlay);
-  const openOverlay = useWorkshop((s) => s.openOverlay);
+  const overlay = useWorkspace((s) => s.overlay);
+  const openOverlay = useWorkspace((s) => s.openOverlay);
 
   useEffect(() => {
     if (!overlay) return;

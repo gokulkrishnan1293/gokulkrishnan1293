@@ -1,4 +1,4 @@
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { SCENES, range } from "@/experience/timeline";
 import { copy } from "@/content";
 
@@ -7,7 +7,7 @@ import { copy } from "@/content";
  * the tour — quiet stage directions, never long-form.
  */
 function Caption({ from, to, children, bottom = "9vh" }: { from: number; to: number; children: React.ReactNode; bottom?: string }) {
-  const progress = useWorkshop((s) => s.progress);
+  const progress = useWorkspace((s) => s.progress);
   if (progress < from || progress > to) return null;
   const opacity = Math.min(range(progress, from, from + 0.015), 1 - range(progress, to - 0.015, to));
   return (
@@ -20,8 +20,8 @@ function Caption({ from, to, children, bottom = "9vh" }: { from: number; to: num
 }
 
 export function SceneCaptions() {
-  const mode = useWorkshop((s) => s.mode);
-  const activeProjectId = useWorkshop((s) => s.activeProjectId);
+  const mode = useWorkspace((s) => s.mode);
+  const activeProjectId = useWorkspace((s) => s.activeProjectId);
   if (mode !== "tour") return null;
   return (
     <>

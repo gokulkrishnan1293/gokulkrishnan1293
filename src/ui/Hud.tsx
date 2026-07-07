@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { versionAt } from "@/experience/timeline";
 import { copy } from "@/content";
 
@@ -9,22 +9,22 @@ import { copy } from "@/content";
  * the sound state, and — in overview — replay intro.
  */
 export function Hud() {
-  const progress = useWorkshop((s) => s.progress);
-  const mode = useWorkshop((s) => s.mode);
-  const audioOn = useWorkshop((s) => s.audioOn);
-  const seated = useWorkshop((s) => s.seated);
-  const setMode = useWorkshop((s) => s.setMode);
-  const replayIntro = useWorkshop((s) => s.replayIntro);
-  const sit = useWorkshop((s) => s.sit);
-  const toggleAudio = useWorkshop((s) => s.toggleAudio);
-  const viewLocked = useWorkshop((s) => s.viewLocked);
-  const setViewLock = useWorkshop((s) => s.setViewLock);
+  const progress = useWorkspace((s) => s.progress);
+  const mode = useWorkspace((s) => s.mode);
+  const audioOn = useWorkspace((s) => s.audioOn);
+  const seated = useWorkspace((s) => s.seated);
+  const setMode = useWorkspace((s) => s.setMode);
+  const replayIntro = useWorkspace((s) => s.replayIntro);
+  const sit = useWorkspace((s) => s.sit);
+  const toggleAudio = useWorkspace((s) => s.toggleAudio);
+  const viewLocked = useWorkspace((s) => s.viewLocked);
+  const setViewLock = useWorkspace((s) => s.setViewLock);
 
   // L = lock, U = unlock, space = toggle — the free look freeze.
   // L/U stay live while a project is open so the view can be pinned mid-read.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const s = useWorkshop.getState();
+      const s = useWorkspace.getState();
       if (s.mode !== "overview" || s.seated) return;
       if (e.code === "KeyL") s.setViewLock(true);
       else if (e.code === "KeyU") s.setViewLock(false);

@@ -2,7 +2,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { L } from "@/experience/timeline";
 import { projects, type Project } from "@/content";
 import { useNormalizedModel } from "./useNormalizedModel";
@@ -51,7 +51,7 @@ function Card({
 
   useFrame((state) => {
     if (!group.current) return;
-    const { activeProjectId } = useWorkshop.getState();
+    const { activeProjectId } = useWorkspace.getState();
     const active = activeProjectId === project.id;
     const targetY = active ? L.deskTop + 0.035 + Math.sin(state.clock.elapsedTime * 2) * 0.006 : L.deskTop;
     group.current.position.y += (targetY - group.current.position.y) * 0.12;
@@ -65,17 +65,17 @@ function Card({
         position={[0, 0.03, 0]}
         onClick={(e) => {
           e.stopPropagation();
-          const s = useWorkshop.getState();
+          const s = useWorkspace.getState();
           s.plugCard(s.activeProjectId === project.id ? null : project.id);
         }}
         onPointerOver={(e) => {
           e.stopPropagation();
           document.body.style.cursor = "pointer";
-          useWorkshop.getState().hoverCard(project.id);
+          useWorkspace.getState().hoverCard(project.id);
         }}
         onPointerOut={() => {
           document.body.style.cursor = "";
-          useWorkshop.getState().hoverCard(null);
+          useWorkspace.getState().hoverCard(null);
         }}
       >
         <boxGeometry args={[0.11, 0.08, 0.13]} />
@@ -90,7 +90,7 @@ function CardLabel({ project }: { project: Project }) {
   const ref = useRef<THREE.Group>(null);
   useFrame(() => {
     if (!ref.current) return;
-    const { activeProjectId, hoveredCardId } = useWorkshop.getState();
+    const { activeProjectId, hoveredCardId } = useWorkspace.getState();
     ref.current.visible = activeProjectId === project.id || hoveredCardId === project.id;
   });
   return (

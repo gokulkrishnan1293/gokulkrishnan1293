@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useProgress } from "@react-three/drei";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { copy } from "@/content";
 
 /**
@@ -9,9 +9,9 @@ import { copy } from "@/content";
  * and catches the begin-click (which doubles as the audio-unlock gesture).
  */
 export function DoorGate() {
-  const phase = useWorkshop((s) => s.phase);
-  const begin = useWorkshop((s) => s.begin);
-  const setPhase = useWorkshop((s) => s.setPhase);
+  const phase = useWorkspace((s) => s.phase);
+  const begin = useWorkspace((s) => s.begin);
+  const setPhase = useWorkspace((s) => s.setPhase);
   const { progress } = useProgress();
 
   useEffect(() => {

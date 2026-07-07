@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { clamp01, smooth, range, ENTRY_P } from "@/experience/timeline";
 
 /**
@@ -25,7 +25,7 @@ export function Door() {
   const hinge = useRef<THREE.Group>(null);
 
   useFrame(() => {
-    const { phase, enteredAt, mode, progress } = useWorkshop.getState();
+    const { phase, enteredAt, mode, progress } = useWorkspace.getState();
     let open = DOOR.ajar;
     if (phase === "entering" && enteredAt !== null) {
       // the begin-click pushes it the rest of the way

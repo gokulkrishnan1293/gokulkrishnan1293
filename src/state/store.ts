@@ -8,7 +8,7 @@ export interface Overlay {
   id: string;
 }
 
-interface WorkshopState {
+interface WorkspaceState {
   phase: Phase;
   mode: Mode;
   /** 0..1 through the tour film. Driven by scroll. */
@@ -39,7 +39,7 @@ interface WorkshopState {
   replayIntro: () => void;
 }
 
-export const useWorkshop = create<WorkshopState>((set) => ({
+export const useWorkspace = create<WorkspaceState>((set) => ({
   phase: "loading",
   mode: "tour",
   progress: 0,

@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 
 /**
- * A barely-there workshop hum (filtered noise + low sine), synthesized —
+ * A barely-there workspace hum (filtered noise + low sine), synthesized —
  * no audio files. Off by default; the speakers are the diegetic toggle.
  */
 export function useAmbientAudio() {
-  const audioOn = useWorkshop((s) => s.audioOn);
+  const audioOn = useWorkspace((s) => s.audioOn);
   const ctxRef = useRef<{ ctx: AudioContext; gain: GainNode } | null>(null);
 
   useEffect(() => {

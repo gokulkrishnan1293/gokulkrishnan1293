@@ -2,7 +2,7 @@ import { useMemo, useRef, type RefObject } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
-import { useWorkshop } from "@/state/store";
+import { useWorkspace } from "@/state/store";
 import { L, reveal, range, smooth, SCENES } from "@/experience/timeline";
 
 // RectAreaLight needs its LTC lookup tables initialized once
@@ -111,7 +111,7 @@ export function Lights() {
   const ambient = useRef<THREE.AmbientLight>(null);
 
   useFrame(() => {
-    const { progress: p, mode, phase } = useWorkshop.getState();
+    const { progress: p, mode, phase } = useWorkspace.getState();
     // before the visitor is inside, the room stays dark whatever the mode
     const ov = mode === "overview" && phase === "ready";
     const full = ov ? 1 : smooth(range(p, SCENES.finale.start, 0.95));
