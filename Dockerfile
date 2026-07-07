@@ -24,8 +24,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy Nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 3015
-EXPOSE 3015
+# Expose ports 3015 and 3016
+EXPOSE 3015 3016
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
