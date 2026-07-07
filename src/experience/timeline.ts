@@ -29,6 +29,34 @@ export const smooth = (t: number) => t * t * (3 - 2 * t);
  *  and scrolling back below it walks you back out */
 export const ENTRY_P = 0.055;
 
+// ── scroll ↔ progress mapping ────────────────────────────────
+// The timeline keeps its tuned 0..1 numbers, but scroll is not spent
+// evenly on it: the cards beat gets the same scroll length as the desk
+// beat (a project loads on click — no need to dwell) instead of a third
+// of the track. Piecewise-linear, monotonic: [scroll fraction, progress].
+
+const SCROLL_MAP: [number, number][] = [
+  [0, 0],
+  [0.70588, SCENES.cards.start],
+  [0.84706, SCENES.finale.start],
+  [1, 1],
+];
+
+function piecewise(map: [number, number][], v: number, from: 0 | 1, to: 0 | 1): number {
+  if (v <= map[0][from]) return map[0][to];
+  for (let i = 0; i < map.length - 1; i++) {
+    const a = map[i];
+    const b = map[i + 1];
+    if (v <= b[from]) return a[to] + ((v - a[from]) / (b[from] - a[from])) * (b[to] - a[to]);
+  }
+  return map[map.length - 1][to];
+}
+
+/** raw scroll fraction (scrollY / max) → timeline progress */
+export const scrollToProgress = (s: number) => piecewise(SCROLL_MAP, s, 0, 1);
+/** timeline progress → the scroll fraction that lands there */
+export const progressToScroll = (p: number) => piecewise(SCROLL_MAP, p, 1, 0);
+
 // ── set layout (world units ~ meters; camera faces -z) ───────
 
 export const L = {
@@ -191,6 +219,7 @@ export type ScreenMode =
   | { kind: "welcome" }
   | { kind: "dim" }
   | { kind: "skills" }
+  | { kind: "drives" }
   | { kind: "project"; id: string }
   | { kind: "finale" }
   | { kind: "hub" };
@@ -204,7 +233,9 @@ export function screenModeAt(
   if (mode === "overview") return { kind: "hub" };
   if (p < SCENES.frameIn.start) return { kind: "welcome" };
   if (p < SCENES.desk.start - 0.02) return { kind: "dim" };
-  if (p < SCENES.cards.end - 0.005) return { kind: "skills" };
+  if (p < SCENES.cards.start) return { kind: "skills" };
+  // desk beat, nothing plugged in — the screen invites a drive
+  if (p < SCENES.cards.end - 0.005) return { kind: "drives" };
   return { kind: "finale" };
 }
 

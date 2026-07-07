@@ -115,6 +115,8 @@ function ScreenBody({ screen }: { screen: ScreenMode }) {
       return <DimScreen />;
     case "skills":
       return <SkillsExplorer />;
+    case "drives":
+      return <DrivesScreen />;
     case "project":
       return <ProjectScreen id={screen.id} />;
     case "finale":
@@ -198,6 +200,38 @@ function SkillsExplorer() {
       </div>
       <div className="border-t border-[#ffffff12] px-4 py-1.5 text-[10.5px] text-[#5b564d]">
         {skills.reduce((n, g) => n + g.items.length, 0)} files · current stack · updated from git
+      </div>
+    </div>
+  );
+}
+
+// ── Scene 5a: desk beat, nothing plugged in ──────────────────
+
+function DrivesScreen() {
+  return (
+    <div className="flex h-full flex-col">
+      <TitleBar title="~/gokul/projects" dotColor="#ffb454" />
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
+        <div className="text-[15px] text-[#f0ead9]">
+          <span className="cursor-blink text-[#ffb454]">▌</span> no drive detected
+        </div>
+        <p className="text-[12px] leading-relaxed text-[#9a958a]">{copy.projects.caption}</p>
+        <p className="text-[11px] text-[#6c675e]">{copy.projects.hint}</p>
+        <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+          {projects.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => useWorkspace.getState().plugCard(p.id)}
+              className="rounded border border-[#ffffff1c] px-2 py-1 text-[10.5px] text-[#b8b3a6] hover:border-[#ffb45466] hover:text-[#ffb454]"
+              style={{ borderLeftColor: p.card.color, borderLeftWidth: 2 }}
+            >
+              ▸ {p.card.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="border-t border-[#ffffff12] px-4 py-1.5 text-[10.5px] text-[#5b564d]">
+        {projects.length} drives on the desk · plug one in to load it
       </div>
     </div>
   );

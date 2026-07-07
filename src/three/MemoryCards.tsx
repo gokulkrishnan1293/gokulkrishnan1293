@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
@@ -81,7 +81,12 @@ function Card({
         <boxGeometry args={[0.11, 0.08, 0.13]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <CardLabel project={project} />
+      {/* own suspense boundary: the label's font streams from a CDN —
+          if that hangs (blocked network), only the label goes missing,
+          not the whole room */}
+      <Suspense fallback={null}>
+        <CardLabel project={project} />
+      </Suspense>
     </group>
   );
 }

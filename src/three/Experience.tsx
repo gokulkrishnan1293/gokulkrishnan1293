@@ -6,11 +6,9 @@ import { Stage } from "./Stage";
 import { Lights } from "./Lights";
 import { CameraRig } from "./CameraRig";
 import { preloadModels } from "./useNormalizedModel";
-
 // phone GPUs choke on dpr 2 + MSAA for a scene this size — cap resolution
-// on coarse-pointer (touch) devices so the frame loop keeps up with scroll
-const COARSE =
-  typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)").matches === true;
+// on touch devices so the frame loop keeps up with scroll
+import { COARSE_POINTER } from "@/utils/device";
 
 preloadModels([
   "/models/desk.glb",
@@ -29,7 +27,7 @@ export function Experience() {
   return (
     <Canvas
       className="!fixed inset-0"
-      dpr={COARSE ? [1, 1.5] : [1, 2]}
+      dpr={COARSE_POINTER ? [1, 1.5] : [1, 2]}
       camera={{ position: [0.42, 1.22, 4.55], fov: 46, near: 0.05, far: 30 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       onCreated={({ scene }) => {
