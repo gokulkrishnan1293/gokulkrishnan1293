@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type Phase = "loading" | "gate" | "ready";
+export type Phase = "loading" | "gate" | "entering" | "ready";
 export type Mode = "tour" | "overview";
 
 export interface Overlay {
@@ -23,6 +23,8 @@ interface WorkshopState {
   /** overview free-look frozen in place (view the whiteboard, read, …) */
   viewLocked: boolean;
   isReturnVisit: boolean;
+  /** timestamp of the click that pushed the door open — drives the walk-in */
+  enteredAt: number | null;
 
   setPhase: (p: Phase) => void;
   setMode: (m: Mode) => void;
@@ -34,6 +36,7 @@ interface WorkshopState {
   sit: (s: boolean) => void;
   setViewLock: (v: boolean) => void;
   begin: () => void;
+  finishEnter: () => void;
   replayIntro: () => void;
 }
 
@@ -58,6 +61,7 @@ export const useWorkshop = create<WorkshopState>((set) => ({
   seated: false,
   viewLocked: false,
   isReturnVisit: visitedBefore,
+  enteredAt: null,
 
   setPhase: (phase) => set({ phase }),
   setMode: (mode) =>
@@ -75,8 +79,9 @@ export const useWorkshop = create<WorkshopState>((set) => ({
     } catch {
       /* private mode — fine */
     }
-    set({ phase: "ready" });
+    set({ phase: "entering", enteredAt: performance.now() });
   },
+  finishEnter: () => set({ phase: "ready" }),
   replayIntro: () =>
     set({
       mode: "tour",

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useWorkshop } from "@/state/store";
 import { SCENES } from "@/experience/timeline";
 import { Experience } from "@/three/Experience";
-import { LadderLoader } from "@/ui/LadderLoader";
+import { DoorGate } from "@/ui/DoorGate";
 import { Hud } from "@/ui/Hud";
 import { ModeChoice } from "@/ui/ModeChoice";
 import { JourneyOverlay } from "@/ui/JourneyOverlay";
@@ -28,6 +28,11 @@ export function App() {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
       s.setProgress(p);
+      // the end of the track IS the full switch — no click needed
+      if (p >= 0.999) {
+        s.setMode("overview");
+        return;
+      }
       // scrolling away from the desk ejects the plugged-in pendrive
       if (s.activeProjectId && (p >= SCENES.finale.start || p < SCENES.cards.start - 0.02)) {
         s.plugCard(null);
@@ -69,7 +74,7 @@ export function App() {
         </>
       )}
 
-      <LadderLoader />
+      <DoorGate />
     </>
   );
 }

@@ -16,7 +16,8 @@ const PX = 0.04;
 
 export function MonitorScreen() {
   const phase = useWorkshop((s) => s.phase);
-  const on = phase === "ready";
+  // lit from the moment the door hangs ajar — the glow that pulls you in
+  const on = phase !== "loading";
 
   return (
     <group position={[L.screenCenter.x, L.screenCenter.y, L.screenCenter.z]}>
@@ -32,6 +33,7 @@ export function MonitorScreen() {
       {on && (
         <Html
           transform
+          occlude
           position={[0, 0, 0.004]}
           scale={PX}
           style={{ pointerEvents: "auto" }}

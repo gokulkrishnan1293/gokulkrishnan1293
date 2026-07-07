@@ -20,13 +20,18 @@ export function Hud() {
   const viewLocked = useWorkshop((s) => s.viewLocked);
   const setViewLock = useWorkshop((s) => s.setViewLock);
 
-  // space = freeze / release the free look (overview only)
+  // L = lock, U = unlock, space = toggle — the free look freeze.
+  // L/U stay live while a project is open so the view can be pinned mid-read.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const s = useWorkshop.getState();
-      if (e.code !== "Space" || s.mode !== "overview" || s.seated || s.overlay) return;
-      e.preventDefault();
-      s.setViewLock(!s.viewLocked);
+      if (s.mode !== "overview" || s.seated) return;
+      if (e.code === "KeyL") s.setViewLock(true);
+      else if (e.code === "KeyU") s.setViewLock(false);
+      else if (e.code === "Space" && !s.overlay) {
+        e.preventDefault();
+        s.setViewLock(!s.viewLocked);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -65,9 +70,9 @@ export function Hud() {
           <button
             onClick={() => setViewLock(!viewLocked)}
             className={`transition-colors ${viewLocked ? "text-[#ffb454]" : "text-[#6c675e] hover:text-[#9a958a]"}`}
-            title="space also toggles this"
+            title="L locks · U unlocks · space toggles"
           >
-            {viewLocked ? "🔒 view locked" : "🔓 lock view"}
+            {viewLocked ? "🔒 view locked · U unlocks" : "🔓 lock view · L"}
           </button>
         )}
         {overview && (

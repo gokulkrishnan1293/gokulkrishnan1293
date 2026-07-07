@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
@@ -10,6 +10,7 @@ import { MonitorScreen } from "./MonitorScreen";
 import { WhiteboardSurface } from "./WhiteboardSurface";
 import { MemoryCards } from "./MemoryCards";
 import { SpeakerLeds } from "./SpeakerLeds";
+import { Door } from "./Door";
 
 const v = (vec: THREE.Vector3): [number, number, number] => [vec.x, vec.y, vec.z];
 
@@ -73,19 +74,66 @@ function Couple() {
 function Chair() {
   const model = useNormalizedModel("/models/chair.glb", 1.05, { axis: "y", rotateY: Math.PI });
   const isOverview = useWorkshop((s) => s.mode === "overview");
+  const group = useRef<THREE.Group>(null);
+  // once the lights are on the chair spins: drag to give it a push,
+  // a plain click (no drag) still sits you down
+  const spin = useRef({ dragging: false, lastX: 0, moved: 0, vel: 0 });
+
+  useEffect(() => {
+    if (!isOverview) return;
+    const onMove = (e: PointerEvent) => {
+      const s = spin.current;
+      if (!s.dragging || !group.current) return;
+      const dx = e.clientX - s.lastX;
+      s.lastX = e.clientX;
+      s.moved += Math.abs(dx);
+      group.current.rotation.y += dx * 0.012;
+      s.vel = THREE.MathUtils.clamp(dx * 0.55, -7, 7);
+    };
+    const onUp = () => {
+      const s = spin.current;
+      if (!s.dragging) return;
+      s.dragging = false;
+      if (s.moved < 6) {
+        s.vel = 0;
+        useWorkshop.getState().sit(true);
+      }
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [isOverview]);
+
+  useFrame((_, delta) => {
+    const s = spin.current;
+    if (!group.current || s.dragging || Math.abs(s.vel) < 0.002) return;
+    group.current.rotation.y += s.vel * delta;
+    s.vel *= Math.exp(-1.6 * delta);
+  });
+
   return (
-    <Sketchable
-      model={model}
-      section="chair"
-      position={v(L.chair)}
-      onClick={(e) => {
-        e.stopPropagation();
-        const s = useWorkshop.getState();
-        if (s.mode === "overview") s.sit(true);
-      }}
-      onPointerOver={isOverview ? () => (document.body.style.cursor = "pointer") : undefined}
-      onPointerOut={isOverview ? () => (document.body.style.cursor = "") : undefined}
-    />
+    <group ref={group} position={v(L.chair)}>
+      <Sketchable
+        model={model}
+        section="chair"
+        onPointerDown={
+          isOverview
+            ? (e) => {
+                e.stopPropagation();
+                spin.current.dragging = true;
+                spin.current.lastX = e.clientX;
+                spin.current.moved = 0;
+                spin.current.vel = 0;
+              }
+            : undefined
+        }
+        onPointerOver={isOverview ? () => (document.body.style.cursor = "grab") : undefined}
+        onPointerOut={isOverview ? () => (document.body.style.cursor = "") : undefined}
+      />
+    </group>
   );
 }
 
@@ -207,6 +255,7 @@ export function Stage() {
       <Whiteboard />
       <PanoramaFrame />
       <MemoryCards />
+      <Door />
     </group>
   );
 }

@@ -3,7 +3,7 @@
 # ─────────────────────────────────────────────────────────────
 
 loading:
-  hint: "click to begin"
+  hint: "the door's open — step inside"
 
 welcome:
   greeting: "Hi, I'm Gokul Krishnan"

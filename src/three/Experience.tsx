@@ -25,7 +25,7 @@ export function Experience() {
     <Canvas
       className="!fixed inset-0"
       dpr={[1, 2]}
-      camera={{ position: [0, 1.06, 0.62], fov: 42, near: 0.05, far: 30 }}
+      camera={{ position: [0.42, 1.22, 4.55], fov: 46, near: 0.05, far: 30 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       onCreated={({ scene }) => {
         if (import.meta.env.DEV) (window as unknown as { __scene: THREE.Scene }).__scene = scene;

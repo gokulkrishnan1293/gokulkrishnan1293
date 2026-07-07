@@ -11,11 +11,14 @@ import { copy, projects } from "@/content";
 const PX = 0.04; // 1px ≙ 1mm (drei transform: 1px = 1/40 unit), same as the monitor
 
 export function WhiteboardSurface() {
-  const visible = useWorkshop((s) => s.mode === "overview" || s.progress > 0.08);
+  // content appears only once the visitor is inside the room
+  const visible = useWorkshop(
+    (s) => s.phase === "ready" && (s.mode === "overview" || s.progress > 0.08),
+  );
   if (!visible) return null;
   return (
     <group position={[L.whiteboard.x, L.whiteboard.y, L.whiteboard.z + 0.075]}>
-      <Html transform position={[0, 0, 0.004]} scale={PX} zIndexRange={[9, 0]}>
+      <Html transform occlude position={[0, 0, 0.004]} scale={PX} zIndexRange={[9, 0]}>
         <BoardUI />
       </Html>
     </group>
