@@ -2,6 +2,7 @@ import { Html } from "@react-three/drei";
 import { useWorkspace } from "@/state/store";
 import { L } from "@/experience/timeline";
 import { copy, projects } from "@/content";
+import { SharpHtml } from "./MonitorScreen";
 
 /**
  * The whiteboard: philosophy home by default (sticky notes + quote),
@@ -9,7 +10,6 @@ import { copy, projects } from "@/content";
  */
 
 const PX = 0.04; // 1px ≙ 1mm (drei transform: 1px = 1/40 unit), same as the monitor
-const SHARP = 2; // 2× DOM resolution, scaled down — keeps text crisp when large
 
 export function WhiteboardSurface() {
   // content appears only once the visitor is inside the room
@@ -19,15 +19,10 @@ export function WhiteboardSurface() {
   if (!visible) return null;
   return (
     <group position={[L.whiteboard.x, L.whiteboard.y, L.whiteboard.z + 0.075]}>
-      <Html
-        transform
-        occlude
-        position={[0, 0, 0.004]}
-        scale={PX / SHARP}
-        style={{ zoom: SHARP }}
-        zIndexRange={[9, 0]}
-      >
-        <BoardUI />
+      <Html transform occlude position={[0, 0, 0.004]} scale={PX} zIndexRange={[9, 0]}>
+        <SharpHtml w={1440} h={900}>
+          <BoardUI />
+        </SharpHtml>
       </Html>
     </group>
   );

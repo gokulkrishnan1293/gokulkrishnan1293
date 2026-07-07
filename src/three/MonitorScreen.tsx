@@ -17,6 +17,30 @@ const PX = 0.04;
 // size, so without this the screen goes soft on large/hidpi viewports
 const SHARP = 2;
 
+/**
+ * 2× rasterization inside a fixed-size box: `zoom` doubles the layout
+ * (crisp raster), the counter-scale shrinks it back visually. The outer
+ * box keeps its original size so drei's transform anchor stays glued to
+ * the 3D object instead of drifting as the camera moves.
+ */
+export function SharpHtml({ w, h, children }: { w: number; h: number; children: React.ReactNode }) {
+  return (
+    <div style={{ width: w, height: h, overflow: "visible" }}>
+      <div
+        style={{
+          width: w,
+          height: h,
+          zoom: SHARP,
+          transform: `scale(${1 / SHARP})`,
+          transformOrigin: "top left",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function MonitorScreen() {
   const phase = useWorkspace((s) => s.phase);
   // lit from the moment the door hangs ajar — the glow that pulls you in
@@ -38,11 +62,13 @@ export function MonitorScreen() {
           transform
           occlude
           position={[0, 0, 0.004]}
-          scale={PX / SHARP}
-          style={{ pointerEvents: "auto", zoom: SHARP }}
+          scale={PX}
+          style={{ pointerEvents: "auto" }}
           zIndexRange={[10, 0]}
         >
-          <ScreenUI />
+          <SharpHtml w={620} h={345}>
+            <ScreenUI />
+          </SharpHtml>
         </Html>
       )}
     </group>
