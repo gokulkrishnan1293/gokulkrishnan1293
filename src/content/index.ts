@@ -79,7 +79,6 @@ export interface Failure {
 export interface Copy {
   loading: { hint: string };
   welcome: { greeting: string; sketchLine: string };
-  modeChoice: { prompt: string; tour: string; tourSub: string; overview: string; overviewSub: string };
   journey: { intro: string; outro: string };
   desk: { caption: string; whiteboardQuote: string };
   projects: { caption: string; hint: string };

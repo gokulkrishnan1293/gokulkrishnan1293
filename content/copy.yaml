@@ -9,13 +9,6 @@ welcome:
   greeting: "Hi, I'm Gokul Krishnan"
   sketchLine: "Every impossible idea begins as an unfinished sketch."
 
-modeChoice:
-  prompt: "How do you want to see the workspace?"
-  tour: "Take the tour"
-  tourSub: "the story, scroll-driven · ~3 min"
-  overview: "Turn on the lights"
-  overviewSub: "everything at once · 30 sec"
-
 journey:
   intro: "To climb a bigger mountain, you first have to walk back down."
   outro: "Still climbing. The next chapter isn't drawn yet."

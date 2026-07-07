@@ -1,41 +1,21 @@
-import { useEffect } from "react";
 import { useWorkspace } from "@/state/store";
 import { versionAt } from "@/experience/timeline";
 import { copy } from "@/content";
 
 /**
  * Always-on chrome: the version indicator (progress = iteration, not a bar),
- * the light switch (the escape hatch to Overview, visible from second zero),
- * the sound state, and — in overview — replay intro.
+ * the sound state, and — in the lit workspace — the view lock. Navigation
+ * lives in the stage rail; there are no modes to toggle.
  */
 export function Hud() {
   const progress = useWorkspace((s) => s.progress);
   const mode = useWorkspace((s) => s.mode);
   const audioOn = useWorkspace((s) => s.audioOn);
   const seated = useWorkspace((s) => s.seated);
-  const setMode = useWorkspace((s) => s.setMode);
-  const replayIntro = useWorkspace((s) => s.replayIntro);
   const sit = useWorkspace((s) => s.sit);
   const toggleAudio = useWorkspace((s) => s.toggleAudio);
   const viewLocked = useWorkspace((s) => s.viewLocked);
   const setViewLock = useWorkspace((s) => s.setViewLock);
-
-  // L = lock, U = unlock, space = toggle — the free look freeze.
-  // L/U stay live while a project is open so the view can be pinned mid-read.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const s = useWorkspace.getState();
-      if (s.mode !== "overview" || s.seated) return;
-      if (e.code === "KeyL") s.setViewLock(true);
-      else if (e.code === "KeyU") s.setViewLock(false);
-      else if (e.code === "Space" && !s.overlay) {
-        e.preventDefault();
-        s.setViewLock(!s.viewLocked);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   const overview = mode === "overview";
   const version = overview || progress > 0.985 ? copy.version.next : versionAt(progress);
@@ -47,37 +27,15 @@ export function Hud() {
         {version}
       </div>
 
-      {/* light switch — top right */}
-      <button
-        onClick={() => setMode(overview ? "tour" : "overview")}
-        className="group fixed top-4 right-5 z-30 flex items-center gap-2 rounded border border-[#ffffff1a] bg-[#0a0a0cbb] px-3 py-2 font-mono text-[11.5px] text-[#9a958a] backdrop-blur transition-colors hover:border-[#ffb45455] hover:text-[#ffb454]"
-        title={overview ? "back to the tour" : "skip the story — light everything"}
-      >
-        {/* a tiny switch glyph */}
-        <span className="relative inline-block h-[14px] w-[9px] rounded-[2px] border border-current">
-          <span
-            className={`absolute left-[1.5px] h-[4px] w-[4px] rounded-[1px] bg-current transition-all ${
-              overview ? "top-[1.5px]" : "bottom-[1.5px]"
-            }`}
-          />
-        </span>
-        {overview ? "resume the tour" : "turn on the lights"}
-      </button>
-
-      {/* audio + replay + view lock — bottom right */}
+      {/* audio + view lock — bottom right */}
       <div className="fixed right-5 bottom-4 z-30 flex items-center gap-3 font-mono text-[11.5px]">
         {overview && !seated && (
           <button
             onClick={() => setViewLock(!viewLocked)}
             className={`transition-colors ${viewLocked ? "text-[#ffb454]" : "text-[#6c675e] hover:text-[#9a958a]"}`}
-            title="L locks · U unlocks · space toggles"
+            title="push the orb's knob to the top and hold — or click here"
           >
-            {viewLocked ? "🔒 view locked · U unlocks" : "🔓 lock view · L"}
-          </button>
-        )}
-        {overview && (
-          <button onClick={replayIntro} className="text-[#6c675e] transition-colors hover:text-[#ffb454]">
-            ↺ replay intro
+            {viewLocked ? "🔒 view locked" : "🔓 lock view"}
           </button>
         )}
         <button

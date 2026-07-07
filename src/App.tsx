@@ -4,19 +4,22 @@ import { SCENES, ENTRY_P } from "@/experience/timeline";
 import { Experience } from "@/three/Experience";
 import { DoorGate } from "@/ui/DoorGate";
 import { Hud } from "@/ui/Hud";
-import { ModeChoice } from "@/ui/ModeChoice";
 import { JourneyOverlay } from "@/ui/JourneyOverlay";
 import { ReadingPanel } from "@/ui/ReadingPanel";
 import { SceneCaptions } from "@/ui/SceneCaptions";
 import { LookOrb } from "@/ui/LookOrb";
+import { StageRail } from "@/ui/StageRail";
 import { useAmbientAudio } from "@/ui/useAmbientAudio";
 
 /** Total scroll length of the tour, in viewport-heights. */
 const TRACK_VH = 900;
 
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
 export function App() {
   const phase = useWorkspace((s) => s.phase);
   const mode = useWorkspace((s) => s.mode);
+  const scrollTarget = useWorkspace((s) => s.scrollTarget);
   const trackRef = useRef<HTMLDivElement>(null);
 
   useAmbientAudio();
@@ -53,10 +56,41 @@ export function App() {
     };
   }, [phase, mode]);
 
-  // replay intro → scroll back to top instantly
+  // stage rail: ease the scroll to the requested beat; manual input cancels
   useEffect(() => {
-    if (mode === "tour") window.scrollTo({ top: 0 });
-  }, [mode]);
+    if (scrollTarget === null || phase !== "ready") return;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const from = window.scrollY;
+    const to = max * scrollTarget;
+    const dur = Math.min(1600, 500 + (Math.abs(to - from) / max) * 1400);
+    const t0 = performance.now();
+    let raf = 0;
+    let cancelled = false;
+    const cancel = () => {
+      cancelled = true;
+    };
+    const step = (now: number) => {
+      if (cancelled) return done();
+      const k = Math.min(1, (now - t0) / dur);
+      window.scrollTo({ top: from + (to - from) * easeInOut(k) });
+      if (k < 1) raf = requestAnimationFrame(step);
+      else done();
+    };
+    const done = () => {
+      window.removeEventListener("wheel", cancel);
+      window.removeEventListener("touchmove", cancel);
+      useWorkspace.getState().clearScrollTarget();
+    };
+    window.addEventListener("wheel", cancel, { passive: true });
+    window.addEventListener("touchmove", cancel, { passive: true });
+    raf = requestAnimationFrame(step);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      window.removeEventListener("wheel", cancel);
+      window.removeEventListener("touchmove", cancel);
+    };
+  }, [scrollTarget, phase]);
 
   // the walk-in ends at ENTRY_P — park the scroll there so the tour picks
   // up seamlessly and scrolling backward walks you back out the door
@@ -76,10 +110,10 @@ export function App() {
       {phase === "ready" && (
         <>
           <SceneCaptions />
-          <ModeChoice />
           <JourneyOverlay />
           <Hud />
           <LookOrb />
+          <StageRail />
           <ReadingPanel />
         </>
       )}

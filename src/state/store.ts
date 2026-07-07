@@ -36,7 +36,10 @@ interface WorkspaceState {
   setViewLock: (v: boolean) => void;
   begin: () => void;
   finishEnter: () => void;
-  replayIntro: () => void;
+  /** progress the stage rail asked to scroll to; App eases there and clears */
+  scrollTarget: number | null;
+  jumpTo: (p: number) => void;
+  clearScrollTarget: () => void;
 }
 
 export const useWorkspace = create<WorkspaceState>((set) => ({
@@ -63,12 +66,15 @@ export const useWorkspace = create<WorkspaceState>((set) => ({
   setViewLock: (viewLocked) => set({ viewLocked }),
   begin: () => set({ phase: "entering", enteredAt: performance.now() }),
   finishEnter: () => set({ phase: "ready" }),
-  replayIntro: () =>
+  scrollTarget: null,
+  jumpTo: (scrollTarget) =>
     set({
+      scrollTarget,
       mode: "tour",
-      progress: 0,
       activeProjectId: null,
       overlay: null,
       seated: false,
+      viewLocked: false,
     }),
+  clearScrollTarget: () => set({ scrollTarget: null }),
 }));

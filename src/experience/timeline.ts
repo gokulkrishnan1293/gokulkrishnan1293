@@ -13,7 +13,6 @@ import { featuredProjects } from "@/content";
 export const SCENES = {
   welcome: { start: 0.0, end: 0.06 },
   zoomout: { start: 0.06, end: 0.18 },
-  modeChoice: { start: 0.14, end: 0.21 },
   frameIn: { start: 0.2, end: 0.26 },
   journey: { start: 0.26, end: 0.44 },
   frameOut: { start: 0.44, end: 0.48 },
