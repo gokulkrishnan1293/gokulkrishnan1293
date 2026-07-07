@@ -48,6 +48,11 @@ body,
   50% { transform: translateY(-6px); }
 }
 .character-bob { animation: bob 2.4s ease-in-out infinite; }
+/* phones: no autonomous rhythmic motion — the periodic bob reads as the
+   whole screen pulsing */
+@media (pointer: coarse) {
+  .character-bob { animation: none; }
+}
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }

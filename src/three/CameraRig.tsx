@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useWorkspace } from "@/state/store";
 import { lookInput } from "@/state/lookInput";
+import { COARSE_POINTER } from "@/utils/device";
 import {
   sampleCamera,
   clamp01,
@@ -65,8 +66,9 @@ export function CameraRig() {
       t.pos.copy(sample.pos);
       t.look.copy(sample.look);
       t.fov = sample.fov;
-      if (k === 0) {
-        // idle sway while waiting at the door
+      if (k === 0 && !COARSE_POINTER) {
+        // idle sway while waiting at the door — desktop only; on phones
+        // any autonomous motion reads as shake
         const time = state.clock.elapsedTime;
         t.pos.x += Math.sin(time * 0.35) * 0.012;
         t.pos.y += Math.sin(time * 0.5) * 0.008;
@@ -118,21 +120,24 @@ export function CameraRig() {
       }
       t.look.x += l.x;
       t.look.y += l.y;
-      // breathing: tiny idle drift so held shots stay alive — scaled down
-      // when the camera is nose-to-screen, where the same amplitude makes
-      // the monitor's text visibly wander
-      const time = state.clock.elapsedTime;
-      const breath = Math.min(1, t.pos.distanceTo(t.look) * 0.45);
-      t.pos.x += Math.sin(time * 0.4) * 0.008 * breath;
-      t.pos.y += Math.sin(time * 0.53) * 0.006 * breath;
+      // breathing: tiny idle drift so held shots stay alive — desktop
+      // only (on phones autonomous motion reads as shake), and scaled
+      // down at close range where it makes the monitor's text wander
+      if (!COARSE_POINTER) {
+        const time = state.clock.elapsedTime;
+        const breath = Math.min(1, t.pos.distanceTo(t.look) * 0.45);
+        t.pos.x += Math.sin(time * 0.4) * 0.008 * breath;
+        t.pos.y += Math.sin(time * 0.53) * 0.006 * breath;
+      }
     }
 
     // narrow viewports: dolly back along the view axis so the whole set
-    // survives the crop (fov alone distorts; distance doesn't)
+    // survives the crop (fov alone distorts; distance doesn't) — gentler
+    // in the chair, just enough for the monitor to fit the portrait crop
     const aspect = state.size.width / state.size.height;
-    if (aspect < 0.95 && !seated) {
+    if (aspect < 0.95) {
       _dir.copy(t.pos).sub(t.look).normalize();
-      t.pos.addScaledVector(_dir, (0.95 - aspect) * 1.5);
+      t.pos.addScaledVector(_dir, (0.95 - aspect) * (seated ? 0.6 : 1.5));
     }
 
     const k = 1 - Math.exp(-4.5 * delta);

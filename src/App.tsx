@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useWorkspace } from "@/state/store";
-import { SCENES, ENTRY_P } from "@/experience/timeline";
+import { SCENES, ENTRY_P, scrollToProgress, progressToScroll } from "@/experience/timeline";
+import { COARSE_POINTER } from "@/utils/device";
 import { Experience } from "@/three/Experience";
 import { DoorGate } from "@/ui/DoorGate";
 import { Hud } from "@/ui/Hud";
@@ -11,8 +12,10 @@ import { LookOrb } from "@/ui/LookOrb";
 import { StageRail } from "@/ui/StageRail";
 import { useAmbientAudio } from "@/ui/useAmbientAudio";
 
-/** Total scroll length of the tour, in viewport-heights. */
-const TRACK_VH = 900;
+/** Total scroll length of the tour, in viewport-heights. 765 keeps every
+ *  beat's scroll length from the 900vh track except cards, which now takes
+ *  as much scroll as the desk beat (see SCROLL_MAP in the timeline). */
+const TRACK_VH = 765;
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -43,7 +46,8 @@ export function App() {
         return;
       }
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      const target = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      const frac = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      const target = scrollToProgress(frac);
       // resync after external writes (the ENTRY_P park) or on (re)entry
       if (current === null || s.progress !== lastWritten) current = s.progress;
       current += (target - current) * (1 - Math.exp(-10 * dt));
@@ -57,6 +61,9 @@ export function App() {
       // the absolute bottom, and the finale must still land.
       if (target >= 0.995) {
         s.setMode("overview");
+        // phones: land straight in the builder's seat, nose to the monitor,
+        // so the contact screen is readable without a chair click
+        if (COARSE_POINTER) s.sit(true);
         return;
       }
       // scrolling away from the desk ejects the plugged-in pendrive
@@ -82,7 +89,7 @@ export function App() {
     if (scrollTarget === null || phase !== "ready") return;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const from = window.scrollY;
-    const to = max * scrollTarget;
+    const to = max * progressToScroll(scrollTarget);
     const dur = Math.min(1600, 500 + (Math.abs(to - from) / max) * 1400);
     const t0 = performance.now();
     let raf = 0;
@@ -118,7 +125,7 @@ export function App() {
   useEffect(() => {
     if (phase !== "ready" || useWorkspace.getState().mode !== "tour") return;
     const max = document.documentElement.scrollHeight - window.innerHeight;
-    window.scrollTo({ top: max * ENTRY_P });
+    window.scrollTo({ top: max * progressToScroll(ENTRY_P) });
     // park progress too, so the damped driver doesn't swoop up from 0
     useWorkspace.getState().setProgress(ENTRY_P);
   }, [phase]);
