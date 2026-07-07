@@ -1,0 +1,12 @@
+# ─────────────────────────────────────────────────────────────
+# SECTIONS — enable/disable + order of tour scenes.
+# The tour plays enabled scenes in this order. Overview ignores this.
+# ─────────────────────────────────────────────────────────────
+
+scenes:
+  - { id: welcome, enabled: true }
+  - { id: zoomout, enabled: true }
+  - { id: journey, enabled: true }
+  - { id: desk, enabled: true }
+  - { id: projects, enabled: true }
+  - { id: finale, enabled: true }

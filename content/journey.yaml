@@ -1,0 +1,61 @@
+# ─────────────────────────────────────────────────────────────
+# JOURNEY — drives the mountain-range panorama (Scene 3)
+#
+# Each entry = one peak. Order matters: first entry = first (smallest) peak,
+# last entry = the current climb (tallest peak, summit in clouds, no flag).
+#
+# Fields:
+#   role    — shown on the summit tag
+#   company — optional; shown under the role on the summit tag
+#   period  — free text ("2016", "2019–2020", "2025–Present")
+#   summit  — one line: what you achieved/learned on this peak
+#   valley  — one line: why you climbed down to start the next climb
+#             (the LAST entry's valley is the current state — still ascending)
+#   skills  — optional, max 2–3 tags drawn near the peak as story texture
+#
+# Edit freely; the panorama redraws from this file. Add a new entry when
+# the next chapter begins — the range simply extends.
+# ─────────────────────────────────────────────────────────────
+
+journey:
+  - role: Quality Engineer
+    company: ""
+    period: "2016"
+    summit: "Learned software quality from the ground up."
+    valley: "Realized I wanted to build software, not just test it."
+
+  - role: Frontend Developer
+    company: ""
+    period: "2017"
+    summit: "Started creating user experiences and modern web applications."
+    valley: "Wanted to understand what happens beyond the browser."
+
+  - role: Backend Developer
+    company: ""
+    period: "2018"
+    summit: "Built APIs, services and business logic."
+    valley: "Realized scalable systems require infrastructure knowledge."
+
+  - role: Cloud Engineer
+    company: ""
+    period: "2019–2020"
+    summit: "Learned deployment, automation and distributed systems."
+    valley: "Infrastructure alone wasn't enough—I wanted to design complete systems."
+
+  - role: Technical Lead
+    company: ""
+    period: "2020–2024"
+    summit: "Led teams, architected enterprise applications and mentored engineers."
+    valley: "Wanted to move beyond applications into intelligent systems."
+
+  - role: Technical Architect
+    company: ""
+    period: "2024–2025"
+    summit: "Focused on architecture, scalability and platform thinking."
+    valley: "Began exploring AI as the next evolution of software."
+
+  - role: Forward Deployed Engineer / AI Architect
+    company: ""
+    period: "2025–Present"
+    summit: "Building AI-native systems, agentic workflows and intelligent platforms."
+    valley: "Current climb — still ascending."

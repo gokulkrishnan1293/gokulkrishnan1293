@@ -1,0 +1,9 @@
+# ─────────────────────────────────────────────────────────────
+# NOW — the `Building...` monitor in Scene 6. Edited most often.
+# Keep each line short; they render as a live terminal list.
+# ─────────────────────────────────────────────────────────────
+
+building:
+  - "agentic workflows that ship real work"
+  - "AI-native platforms for enterprise teams"
+  - "this workshop (it will never be finished)"

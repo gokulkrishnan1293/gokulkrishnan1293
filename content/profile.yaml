@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────
+# PROFILE — identity, links, SEO. Drives Scene 1 (welcome) and contact.
+# `roles` powers the Scene 1 role flipper (chronological order).
+# `careerStart` lets the site compute years of experience — never stale.
+# ─────────────────────────────────────────────────────────────
+
+name: Gokul Krishnan
+tagline: "Every impossible idea begins as an unfinished sketch."
+careerStart: 2016
+
+roles:
+  - Quality Engineer
+  - Frontend Developer
+  - Backend Developer
+  - Cloud Engineer
+  - Technical Lead
+  - Technical Architect
+  - Forward Deployed Engineer
+
+links:
+  email: gokulkrishnan1293@gmail.com
+  github: https://github.com/gokulkrishnan1293
+  linkedin: https://www.linkedin.com/in/gokulkrishnan1293
+  resume: /resume.pdf
+
+seo:
+  title: "Gokul Krishnan — The Workshop"
+  description: >-
+    AI Architect & Forward Deployed Engineer. A builder who climbed every
+    layer of the stack: QA → frontend → backend → cloud → architecture → AI.

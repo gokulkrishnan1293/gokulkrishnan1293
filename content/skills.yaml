@@ -1,0 +1,51 @@
+# ─────────────────────────────────────────────────────────────
+# SKILLS — Scene 4 monitor file-explorer. Groups become folders
+# (`ai/`, `backend/` …); items become files inside them.
+# `ext` is just flavor for the file icon (.ts, .py, .yaml …).
+# ─────────────────────────────────────────────────────────────
+
+groups:
+  - folder: ai
+    items:
+      - { name: "agentic-workflows", ext: "py" }
+      - { name: "llm-orchestration", ext: "py" }
+      - { name: "rag-pipelines", ext: "py" }
+      - { name: "claude-api", ext: "ts" }
+      - { name: "vector-search", ext: "yaml" }
+      - { name: "eval-harnesses", ext: "py" }
+
+  - folder: backend
+    items:
+      - { name: "node", ext: "ts" }
+      - { name: "python", ext: "py" }
+      - { name: "rest-apis", ext: "ts" }
+      - { name: "event-driven", ext: "ts" }
+      - { name: "postgres", ext: "sql" }
+      - { name: "dynamodb", ext: "json" }
+
+  - folder: cloud
+    items:
+      - { name: "aws", ext: "yaml" }
+      - { name: "serverless", ext: "yaml" }
+      - { name: "terraform", ext: "tf" }
+      - { name: "docker", ext: "yaml" }
+      - { name: "ci-cd", ext: "yaml" }
+
+  - folder: frontend
+    items:
+      - { name: "react", ext: "tsx" }
+      - { name: "typescript", ext: "ts" }
+      - { name: "three-js", ext: "ts" }
+      - { name: "tailwind", ext: "css" }
+
+  - folder: architecture
+    items:
+      - { name: "system-design", ext: "md" }
+      - { name: "platform-thinking", ext: "md" }
+      - { name: "team-leading", ext: "md" }
+      - { name: "mentoring", ext: "md" }
+
+  - folder: quality
+    items:
+      - { name: "test-automation", ext: "ts" }
+      - { name: "quality-mindset", ext: "md" }
