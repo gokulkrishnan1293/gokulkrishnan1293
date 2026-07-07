@@ -19,7 +19,9 @@ export function WhiteboardSurface() {
   if (!visible) return null;
   return (
     <group position={[L.whiteboard.x, L.whiteboard.y, L.whiteboard.z + 0.075]}>
-      <Html transform occlude position={[0, 0, 0.004]} scale={PX} zIndexRange={[9, 0]}>
+      {/* no occlude: it raycasts the whole scene every frame, and nothing
+          ever stands between the camera and the board while it's visible */}
+      <Html transform position={[0, 0, 0.004]} scale={PX} zIndexRange={[9, 0]}>
         <SharpHtml w={1440} h={900}>
           <BoardUI />
         </SharpHtml>

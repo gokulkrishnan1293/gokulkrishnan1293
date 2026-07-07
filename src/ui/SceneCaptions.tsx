@@ -7,9 +7,14 @@ import { copy } from "@/content";
  * the tour — quiet stage directions, never long-form.
  */
 function Caption({ from, to, children, bottom = "9vh" }: { from: number; to: number; children: React.ReactNode; bottom?: string }) {
-  const progress = useWorkspace((s) => s.progress);
-  if (progress < from || progress > to) return null;
-  const opacity = Math.min(range(progress, from, from + 0.015), 1 - range(progress, to - 0.015, to));
+  // quantized opacity (−1 = hidden) so the caption re-renders a handful of
+  // times per fade instead of on every scroll tick
+  const opacity = useWorkspace((s) => {
+    if (s.progress < from || s.progress > to) return -1;
+    const o = Math.min(range(s.progress, from, from + 0.015), 1 - range(s.progress, to - 0.015, to));
+    return Math.round(o * 25) / 25;
+  });
+  if (opacity < 0) return null;
   return (
     <div className="fixed inset-x-0 z-20 flex justify-center px-6 text-center" style={{ bottom, opacity }}>
       <p className="max-w-[560px] font-mono text-[12.5px] leading-relaxed text-[#9a958a] [text-shadow:0_2px_8px_#000]">

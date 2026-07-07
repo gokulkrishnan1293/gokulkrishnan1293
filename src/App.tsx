@@ -24,27 +24,48 @@ export function App() {
 
   useAmbientAudio();
 
-  // scroll → progress
+  // scroll → progress, damped in a rAF loop. Mobile scroll events arrive in
+  // coarse steps (touch + momentum), so the raw value is smoothed here once
+  // and everything downstream — camera, overlays, reveals — reads the same
+  // jitter-free progress.
   useEffect(() => {
-    const onScroll = () => {
+    let raf = 0;
+    let current: number | null = null;
+    let lastWritten: number | null = null;
+    let last = performance.now();
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick);
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
       const s = useWorkspace.getState();
-      if (s.phase !== "ready" || s.mode !== "tour") return;
+      if (s.phase !== "ready" || s.mode !== "tour") {
+        current = null;
+        return;
+      }
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-      s.setProgress(p);
-      // the end of the track IS the full switch — no click needed
-      if (p >= 0.999) {
+      const target = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      // resync after external writes (the ENTRY_P park) or on (re)entry
+      if (current === null || s.progress !== lastWritten) current = s.progress;
+      current += (target - current) * (1 - Math.exp(-10 * dt));
+      if (Math.abs(target - current) < 0.0004) current = target;
+      if (current !== s.progress) {
+        lastWritten = current;
+        s.setProgress(current);
+      }
+      // the end of the track IS the full switch — no click needed.
+      // 0.995, not 0.999: mobile momentum often stops a few px short of
+      // the absolute bottom, and the finale must still land.
+      if (target >= 0.995) {
         s.setMode("overview");
         return;
       }
       // scrolling away from the desk ejects the plugged-in pendrive
-      if (s.activeProjectId && (p >= SCENES.finale.start || p < SCENES.cards.start - 0.02)) {
+      if (s.activeProjectId && (current >= SCENES.finale.start || current < SCENES.cards.start - 0.02)) {
         s.plugCard(null);
       }
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   // overview mode / loading: lock the page scroll
@@ -98,6 +119,8 @@ export function App() {
     if (phase !== "ready" || useWorkspace.getState().mode !== "tour") return;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     window.scrollTo({ top: max * ENTRY_P });
+    // park progress too, so the damped driver doesn't swoop up from 0
+    useWorkspace.getState().setProgress(ENTRY_P);
   }, [phase]);
 
   return (

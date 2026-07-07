@@ -17,18 +17,17 @@ const STAGES: { label: string; p: number }[] = [
 ];
 
 export function StageRail() {
-  const progress = useWorkspace((s) => s.progress);
-  const mode = useWorkspace((s) => s.mode);
   const seated = useWorkspace((s) => s.seated);
   const overlay = useWorkspace((s) => s.overlay);
   const jumpTo = useWorkspace((s) => s.jumpTo);
+  // derived index, not raw progress — re-renders only when the active dot moves
+  const active = useWorkspace((s) =>
+    s.mode === "overview"
+      ? STAGES.length - 1
+      : STAGES.reduce((acc, st, i) => (s.progress >= st.p - 0.012 ? i : acc), 0),
+  );
 
   if (seated || overlay) return null;
-
-  const active =
-    mode === "overview"
-      ? STAGES.length - 1
-      : STAGES.reduce((acc, s, i) => (progress >= s.p - 0.012 ? i : acc), 0);
 
   return (
     <nav className="fixed top-1/2 right-4 z-30 flex -translate-y-1/2 flex-col items-end gap-3.5">

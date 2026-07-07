@@ -118,10 +118,13 @@ export function CameraRig() {
       }
       t.look.x += l.x;
       t.look.y += l.y;
-      // breathing: tiny idle drift so held shots stay alive
+      // breathing: tiny idle drift so held shots stay alive — scaled down
+      // when the camera is nose-to-screen, where the same amplitude makes
+      // the monitor's text visibly wander
       const time = state.clock.elapsedTime;
-      t.pos.x += Math.sin(time * 0.4) * 0.008;
-      t.pos.y += Math.sin(time * 0.53) * 0.006;
+      const breath = Math.min(1, t.pos.distanceTo(t.look) * 0.45);
+      t.pos.x += Math.sin(time * 0.4) * 0.008 * breath;
+      t.pos.y += Math.sin(time * 0.53) * 0.006 * breath;
     }
 
     // narrow viewports: dolly back along the view axis so the whole set
