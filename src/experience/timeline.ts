@@ -26,6 +26,10 @@ export const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 export const range = (p: number, a: number, b: number) => clamp01((p - a) / (b - a));
 export const smooth = (t: number) => t * t * (3 - 2 * t);
 
+/** progress where the walk through the door ends — the tour resumes here,
+ *  and scrolling back below it walks you back out */
+export const ENTRY_P = 0.055;
+
 // ── set layout (world units ~ meters; camera faces -z) ───────
 
 export const L = {
@@ -65,9 +69,13 @@ interface CamKey {
 }
 
 const CAM: CamKey[] = [
-  // Scene 1 — nose against the glowing monitor
-  { t: 0.0, pos: [0, 1.06, 0.62], look: [0, 1.07, -0.26], fov: 42 },
-  { t: 0.06, pos: [0, 1.1, 0.9], look: [0, 1.05, -0.26], fov: 44 },
+  // Scene 0 — outside the half-open door, the screen glowing through the gap
+  { t: 0.0, pos: [0.42, 1.22, 4.55], look: [0, 1.05, 1.0], fov: 46 },
+  // …through the threshold…
+  { t: 0.03, pos: [0.1, 1.17, 2.9], look: [0, 1.06, 0.4], fov: 45 },
+  // Scene 1 — up to the glowing monitor, desk and wall still in frame
+  { t: ENTRY_P, pos: [0, 1.15, 0.95], look: [0, 1.04, -0.22], fov: 44 },
+  { t: 0.1, pos: [0, 1.15, 0.95], look: [0, 1.04, -0.22], fov: 44 },
   // Scene 2 — pull back, the room fades in
   { t: 0.15, pos: [0.1, 1.5, 2.7], look: [0, 0.95, -0.25], fov: 50 },
   { t: 0.2, pos: [0.45, 1.5, 2.1], look: [1.1, 1.6, -1.0], fov: 48 },
@@ -135,10 +143,9 @@ export type Section =
 const REVEAL: Record<Section, [number, number][]> = {
   monitor: [[0, 1]],
   speakers: [[0, 1]],
-  desk: [
-    [0.06, 0],
-    [0.11, 1],
-  ],
+  // the desk is there from the first glance through the door —
+  // the monitor needs something to rest on
+  desk: [[0, 1]],
   peripherals: [
     [0.08, 0],
     [0.13, 1],

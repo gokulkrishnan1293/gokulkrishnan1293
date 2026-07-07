@@ -2,7 +2,7 @@ import { useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useWorkshop } from "@/state/store";
-import { clamp01, smooth } from "@/experience/timeline";
+import { clamp01, smooth, range, ENTRY_P } from "@/experience/timeline";
 
 /**
  * Scene 0 — the way in. A front wall with a door left ajar; the monitor's
@@ -25,11 +25,18 @@ export function Door() {
   const hinge = useRef<THREE.Group>(null);
 
   useFrame(() => {
-    const { phase, enteredAt } = useWorkshop.getState();
+    const { phase, enteredAt, mode, progress } = useWorkshop.getState();
     let open = DOOR.ajar;
-    if (phase === "entering" || phase === "ready") {
-      const k = enteredAt ? clamp01((performance.now() - enteredAt) / DOOR.openMs) : 1;
+    if (phase === "entering" && enteredAt !== null) {
+      // the begin-click pushes it the rest of the way
+      const k = clamp01((performance.now() - enteredAt) / DOOR.openMs);
       open = DOOR.ajar + (1 - DOOR.ajar) * smooth(k);
+    } else if (phase === "ready") {
+      // scroll-driven: walking back out swings it back to ajar
+      open =
+        mode === "overview"
+          ? 1
+          : DOOR.ajar + (1 - DOOR.ajar) * smooth(range(progress, 0.012, ENTRY_P * 0.8));
     }
     // swings inward, coming to rest along the inside of the front wall
     if (hinge.current) hinge.current.rotation.y = open * 1.92;

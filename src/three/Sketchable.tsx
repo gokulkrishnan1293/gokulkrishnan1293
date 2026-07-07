@@ -52,12 +52,8 @@ export function Sketchable({
   const visRef = useRef<THREE.Group>(null);
 
   useFrame(() => {
-    const { progress, mode, phase } = useWorkshop.getState();
-    let r = reveal(section, progress, mode === "overview" && phase === "ready");
-    // through the ajar door the desk is already there — a dark silhouette
-    // under the glowing screen, so the monitor isn't floating in the void
-    if (phase !== "ready" && (section === "desk" || section === "monitor" || section === "speakers"))
-      r = 1;
+    const { progress, mode } = useWorkshop.getState();
+    const r = reveal(section, progress, mode === "overview");
 
     if (visRef.current) visRef.current.visible = r > 0.005;
 

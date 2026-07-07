@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useWorkshop } from "@/state/store";
-import { SCENES } from "@/experience/timeline";
+import { SCENES, ENTRY_P } from "@/experience/timeline";
 import { Experience } from "@/three/Experience";
 import { DoorGate } from "@/ui/DoorGate";
 import { Hud } from "@/ui/Hud";
@@ -56,6 +56,14 @@ export function App() {
   useEffect(() => {
     if (mode === "tour") window.scrollTo({ top: 0 });
   }, [mode]);
+
+  // the walk-in ends at ENTRY_P — park the scroll there so the tour picks
+  // up seamlessly and scrolling backward walks you back out the door
+  useEffect(() => {
+    if (phase !== "ready" || useWorkshop.getState().mode !== "tour") return;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: max * ENTRY_P });
+  }, [phase]);
 
   return (
     <>

@@ -2,7 +2,15 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useWorkshop } from "@/state/store";
-import { sampleCamera, clamp01, smooth, OVERVIEW_CAM, SEATED_CAM, SCENES } from "@/experience/timeline";
+import {
+  sampleCamera,
+  clamp01,
+  smooth,
+  ENTRY_P,
+  OVERVIEW_CAM,
+  SEATED_CAM,
+  SCENES,
+} from "@/experience/timeline";
 
 /**
  * One camera, four masters: the walk through the door (intro), the scroll
@@ -12,30 +20,14 @@ import { sampleCamera, clamp01, smooth, OVERVIEW_CAM, SEATED_CAM, SCENES } from 
  * master-switches feel like camera moves.
  */
 
-/** waiting at the half-open door, peeking through the gap at the glow */
-const GATE_CAM = {
-  pos: new THREE.Vector3(0.42, 1.22, 4.55),
-  look: new THREE.Vector3(0, 1.05, 1.0),
-  fov: 46,
-};
-/** just past the threshold, mid walk-in */
-const THRESHOLD = {
-  pos: new THREE.Vector3(0.1, 1.16, 3.1),
-  look: new THREE.Vector3(0, 1.08, 1.2),
-};
+/** the begin-click scrubs the first stretch of the timeline (0 → ENTRY_P) */
 const ENTER_MS = 3400;
-
-const _a = new THREE.Vector3();
-const _b = new THREE.Vector3();
 
 export function CameraRig() {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
-  const target = useRef({
-    pos: GATE_CAM.pos.clone(),
-    look: GATE_CAM.look.clone(),
-    fov: GATE_CAM.fov,
-  });
-  const currentLook = useRef(GATE_CAM.look.clone());
+  const gate = sampleCamera(0);
+  const target = useRef({ pos: gate.pos.clone(), look: gate.look.clone(), fov: gate.fov });
+  const currentLook = useRef(gate.look.clone());
   /** wheel dolly: 1 = the wide shot, smaller = closer to the desk */
   const zoom = useRef(1);
   const zoomDir = useRef(new THREE.Vector3());
@@ -56,35 +48,23 @@ export function CameraRig() {
     const t = target.current;
 
     if (phase !== "ready") {
-      // outside, at the half-open door — then the walk in
-      const end = mode === "overview" ? OVERVIEW_CAM : sampleCamera(0);
-      if (phase === "entering" && enteredAt !== null) {
-        const k = clamp01((performance.now() - enteredAt) / ENTER_MS);
-        if (k < 0.3) {
-          // the door swings; a small lean toward the light
-          const u = smooth(k / 0.3);
-          t.pos.lerpVectors(GATE_CAM.pos, THRESHOLD.pos, u * 0.35);
-          t.look.lerpVectors(GATE_CAM.look, THRESHOLD.look, u * 0.5);
-          t.fov = GATE_CAM.fov;
-        } else {
-          // step through and up to the glowing screen
-          const u = smooth((k - 0.3) / 0.7);
-          _a.lerpVectors(GATE_CAM.pos, THRESHOLD.pos, 0.35);
-          _b.lerpVectors(GATE_CAM.look, THRESHOLD.look, 0.5);
-          t.pos.lerpVectors(_a, end.pos, u);
-          t.look.lerpVectors(_b, end.look, u);
-          t.fov = GATE_CAM.fov + (end.fov - GATE_CAM.fov) * u;
-        }
-        if (k >= 1) finishEnter();
-      } else {
-        t.pos.copy(GATE_CAM.pos);
-        t.look.copy(GATE_CAM.look);
-        t.fov = GATE_CAM.fov;
+      // outside, at the half-open door — the begin-click walks the first
+      // stretch of the same timeline the scroll drives afterwards
+      const k =
+        phase === "entering" && enteredAt !== null
+          ? clamp01((performance.now() - enteredAt) / ENTER_MS)
+          : 0;
+      const sample = sampleCamera(ENTRY_P * smooth(k));
+      t.pos.copy(sample.pos);
+      t.look.copy(sample.look);
+      t.fov = sample.fov;
+      if (k === 0) {
         // idle sway while waiting at the door
         const time = state.clock.elapsedTime;
         t.pos.x += Math.sin(time * 0.35) * 0.012;
         t.pos.y += Math.sin(time * 0.5) * 0.008;
       }
+      if (k >= 1) finishEnter();
     } else if (mode === "overview") {
       if (seated) {
         // in the chair: a gentle glance around the working position
@@ -110,10 +90,11 @@ export function CameraRig() {
     } else {
       zoom.current = 1;
       if (activeProjectId && progress >= SCENES.cards.start - 0.02 && progress < SCENES.finale.start) {
-        // a pendrive is plugged in — take the visitor to the monitor
-        t.pos.set(0.04, 1.13, 0.74);
-        t.look.set(0, 1.09, -0.2);
-        t.fov = 42;
+        // a pendrive is plugged in — take the visitor to the monitor,
+        // desk and wall kept in frame
+        t.pos.set(0.04, 1.17, 0.95);
+        t.look.set(0, 1.05, -0.2);
+        t.fov = 44;
       } else {
         const sample = sampleCamera(phase === "ready" ? progress : 0);
         t.pos.copy(sample.pos);
