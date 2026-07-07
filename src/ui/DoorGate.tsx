@@ -22,13 +22,22 @@ export function DoorGate() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-end pb-16"
+      className={`fixed inset-0 z-50 flex flex-col items-center ${phase === "loading" ? "justify-center" : "justify-end pb-16"}`}
       onClick={() => phase === "gate" && begin()}
       style={{ cursor: phase === "gate" ? "pointer" : "default" }}
     >
       {phase === "loading" ? (
-        <div className="font-mono text-[12px] tracking-widest text-[#4a463e]">
-          <span className="cursor-blink">·</span> {Math.round(progress)}%
+        <div className="flex flex-col items-center gap-4" role="status" aria-live="polite">
+          <div
+            className="font-mono leading-none tracking-widest text-ink tabular-nums"
+            style={{ fontSize: "clamp(64px, 16vw, 140px)" }}
+          >
+            {Math.round(progress)}
+            <span className="text-[0.3em] text-ink-dim">%</span>
+          </div>
+          <div className="font-mono text-[12px] uppercase tracking-widest text-ink-dim">
+            <span className="cursor-blink">·</span> loading
+          </div>
         </div>
       ) : (
         <div className="fade-up font-mono text-[13px] text-[#9a958a]">
