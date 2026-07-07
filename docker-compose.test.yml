@@ -5,8 +5,4 @@ services:
     build: .
     ports:
       - "3016:3016"
-    container_name: arc-os-portfolio-test
     restart: unless-stopped
-    environment:
-      - NODE_ENV=test
-      - PORT=3016
