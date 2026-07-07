@@ -13,6 +13,9 @@ import { copy, now, profile, projects, skills } from "@/content";
 // drei Html transform: 1px = 1/40 world unit at scale 1.
 // We want 1px ≙ 0.001 m (screen is 580×320 px ≙ 0.58×0.32 m) → scale 0.04.
 const PX = 0.04;
+// render the DOM at 2× and scale down — Html transform rasterizes at layout
+// size, so without this the screen goes soft on large/hidpi viewports
+const SHARP = 2;
 
 export function MonitorScreen() {
   const phase = useWorkshop((s) => s.phase);
@@ -35,8 +38,8 @@ export function MonitorScreen() {
           transform
           occlude
           position={[0, 0, 0.004]}
-          scale={PX}
-          style={{ pointerEvents: "auto" }}
+          scale={PX / SHARP}
+          style={{ pointerEvents: "auto", zoom: SHARP }}
           zIndexRange={[10, 0]}
         >
           <ScreenUI />

@@ -22,7 +22,6 @@ interface WorkshopState {
   seated: boolean;
   /** overview free-look frozen in place (view the whiteboard, read, …) */
   viewLocked: boolean;
-  isReturnVisit: boolean;
   /** timestamp of the click that pushed the door open — drives the walk-in */
   enteredAt: number | null;
 
@@ -40,19 +39,9 @@ interface WorkshopState {
   replayIntro: () => void;
 }
 
-const VISITED_KEY = "workshop.visited";
-
-const visitedBefore = (() => {
-  try {
-    return localStorage.getItem(VISITED_KEY) === "1";
-  } catch {
-    return false;
-  }
-})();
-
 export const useWorkshop = create<WorkshopState>((set) => ({
   phase: "loading",
-  mode: visitedBefore ? "overview" : "tour",
+  mode: "tour",
   progress: 0,
   audioOn: false,
   activeProjectId: null,
@@ -60,7 +49,6 @@ export const useWorkshop = create<WorkshopState>((set) => ({
   overlay: null,
   seated: false,
   viewLocked: false,
-  isReturnVisit: visitedBefore,
   enteredAt: null,
 
   setPhase: (phase) => set({ phase }),
@@ -73,14 +61,7 @@ export const useWorkshop = create<WorkshopState>((set) => ({
   openOverlay: (overlay) => set({ overlay }),
   sit: (seated) => set({ seated, viewLocked: false }),
   setViewLock: (viewLocked) => set({ viewLocked }),
-  begin: () => {
-    try {
-      localStorage.setItem(VISITED_KEY, "1");
-    } catch {
-      /* private mode — fine */
-    }
-    set({ phase: "entering", enteredAt: performance.now() });
-  },
+  begin: () => set({ phase: "entering", enteredAt: performance.now() }),
   finishEnter: () => set({ phase: "ready" }),
   replayIntro: () =>
     set({

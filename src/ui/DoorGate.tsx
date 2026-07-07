@@ -12,15 +12,11 @@ export function DoorGate() {
   const phase = useWorkshop((s) => s.phase);
   const begin = useWorkshop((s) => s.begin);
   const setPhase = useWorkshop((s) => s.setPhase);
-  const isReturnVisit = useWorkshop((s) => s.isReturnVisit);
   const { progress } = useProgress();
 
   useEffect(() => {
-    if (progress < 100 || phase !== "loading") return;
-    // returning visitors walk straight in — the door only greets you once
-    if (isReturnVisit) useWorkshop.getState().finishEnter();
-    else setPhase("gate");
-  }, [progress, phase, setPhase, isReturnVisit]);
+    if (progress >= 100 && phase === "loading") setPhase("gate");
+  }, [progress, phase, setPhase]);
 
   if (phase === "entering" || phase === "ready") return null;
 

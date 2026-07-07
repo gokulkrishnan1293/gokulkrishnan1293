@@ -23,6 +23,8 @@ import {
 /** the begin-click scrubs the first stretch of the timeline (0 → ENTRY_P) */
 const ENTER_MS = 3400;
 
+const _dir = new THREE.Vector3();
+
 export function CameraRig() {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const gate = sampleCamera(0);
@@ -110,15 +112,22 @@ export function CameraRig() {
       t.pos.y += Math.sin(time * 0.53) * 0.006;
     }
 
+    // narrow viewports: dolly back along the view axis so the whole set
+    // survives the crop (fov alone distorts; distance doesn't)
+    const aspect = state.size.width / state.size.height;
+    if (aspect < 0.95 && !seated) {
+      _dir.copy(t.pos).sub(t.look).normalize();
+      t.pos.addScaledVector(_dir, (0.95 - aspect) * 1.5);
+    }
+
     const k = 1 - Math.exp(-4.5 * delta);
     camera.position.lerp(t.pos, k);
     currentLook.current.lerp(t.look, k);
     camera.lookAt(currentLook.current);
     camera.fov += (t.fov - camera.fov) * k;
 
-    // portrait phones need a wider view to keep the desk in frame
-    const aspect = state.size.width / state.size.height;
-    if (aspect < 0.8) camera.fov = Math.min(75, camera.fov + (0.8 - aspect) * 30);
+    // …and a touch of extra width on true phone portrait
+    if (aspect < 0.8) camera.fov = Math.min(70, camera.fov + (0.8 - aspect) * 18);
     camera.updateProjectionMatrix();
   });
 
