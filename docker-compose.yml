@@ -5,5 +5,4 @@ services:
     build: .
     ports:
       - "3015:3015"
-    container_name: arc-os-portfolio
     restart: unless-stopped
