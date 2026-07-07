@@ -8,7 +8,6 @@ import { copy } from "@/content";
  * lives in the stage rail; there are no modes to toggle.
  */
 export function Hud() {
-  const progress = useWorkspace((s) => s.progress);
   const mode = useWorkspace((s) => s.mode);
   const audioOn = useWorkspace((s) => s.audioOn);
   const seated = useWorkspace((s) => s.seated);
@@ -18,7 +17,10 @@ export function Hud() {
   const setViewLock = useWorkspace((s) => s.setViewLock);
 
   const overview = mode === "overview";
-  const version = overview || progress > 0.985 ? copy.version.next : versionAt(progress);
+  // derived string, not raw progress — re-renders only when the label changes
+  const version = useWorkspace((s) =>
+    s.mode === "overview" || s.progress > 0.985 ? copy.version.next : versionAt(s.progress),
+  );
 
   return (
     <>

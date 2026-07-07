@@ -14,8 +14,16 @@ import { copy, journey } from "@/content";
  *
  * Also serves as a browsable overlay in Overview (click the frame).
  */
+// tour: fade in as the camera reaches the glass, out on the way back
+const IN0 = SCENES.frameIn.end - 0.025;
+const T0 = SCENES.journey.start;
+const T1 = SCENES.journey.end;
+// selector quanta: coarse enough to skip no-op re-renders, fine enough
+// (≈0.25vh of pan per step) to stay visually continuous
+const OP_Q = 1 / 50;
+const JP_Q = 1 / 1200;
+
 export function JourneyOverlay() {
-  const progress = useWorkspace((s) => s.progress);
   const mode = useWorkspace((s) => s.mode);
   const overlay = useWorkspace((s) => s.overlay);
   const openOverlay = useWorkspace((s) => s.openOverlay);
@@ -29,16 +37,15 @@ export function JourneyOverlay() {
     return () => window.removeEventListener("keydown", onKey);
   }, [browsing, openOverlay]);
 
-  // tour: fade in as the camera reaches the glass, out on the way back
-  const IN0 = SCENES.frameIn.end - 0.025;
-  const t0 = SCENES.journey.start;
-  const t1 = SCENES.journey.end;
-  const tourOpacity =
-    Math.min(range(progress, IN0, SCENES.journey.start), 1 - range(progress, t1, SCENES.frameOut.end - 0.01));
+  const tourOpacity = useWorkspace((s) => {
+    const o = Math.min(range(s.progress, IN0, T0), 1 - range(s.progress, T1, SCENES.frameOut.end - 0.01));
+    return Math.round(o / OP_Q) * OP_Q;
+  });
+  // journey position 0..1 across the range, quantized
+  const rawJp = useWorkspace((s) => Math.round(clamp01(range(s.progress, T0, T1)) / JP_Q) * JP_Q);
 
   const visible = browsing || (mode === "tour" && tourOpacity > 0.01);
-  // journey position 0..1 across the range
-  const jp = browsing ? -1 : clamp01(range(progress, t0, t1));
+  const jp = browsing ? -1 : rawJp;
 
   if (!visible) return null;
   return (
@@ -107,6 +114,7 @@ function ClimbScene({
               width: STRIP_W,
               transform: `translateX(calc(50vw - ${peakFrac} * ${STRIP_W}))`,
               transition: "none",
+              willChange: "transform",
             }}
           >
             <ClimbGraph fi={fi} className="h-full w-full" />

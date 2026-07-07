@@ -25,7 +25,18 @@ const SHARP = 2;
  */
 export function SharpHtml({ w, h, children }: { w: number; h: number; children: React.ReactNode }) {
   return (
-    <div style={{ width: w, height: h, overflow: "visible" }}>
+    <div
+      style={{
+        width: w,
+        height: h,
+        overflow: "visible",
+        // own compositor layer: the camera nudges the CSS matrix every
+        // frame, and without this the text re-rasterizes at subpixel
+        // offsets — the "dancing letters"
+        willChange: "transform",
+        backfaceVisibility: "hidden",
+      }}
+    >
       <div
         style={{
           width: w,
@@ -45,6 +56,9 @@ export function MonitorScreen() {
   const phase = useWorkspace((s) => s.phase);
   // lit from the moment the door hangs ajar — the glow that pulls you in
   const on = phase !== "loading";
+  // occlusion raycasts the whole scene every frame — only worth paying for
+  // while the door can actually stand between the camera and the screen
+  const nearDoor = useWorkspace((s) => s.mode === "tour" && s.progress < 0.08);
 
   return (
     <group position={[L.screenCenter.x, L.screenCenter.y, L.screenCenter.z]}>
@@ -60,7 +74,7 @@ export function MonitorScreen() {
       {on && (
         <Html
           transform
-          occlude
+          occlude={nearDoor}
           position={[0, 0, 0.004]}
           scale={PX}
           style={{ pointerEvents: "auto" }}
@@ -76,10 +90,12 @@ export function MonitorScreen() {
 }
 
 function ScreenUI() {
-  const progress = useWorkspace((s) => s.progress);
-  const mode = useWorkspace((s) => s.mode);
+  // subscribe to the derived screen key, not raw progress — the monitor DOM
+  // re-renders only when the screen actually changes, not on every scroll tick
+  const kind = useWorkspace((s) => screenModeAt(s.progress, s.mode, s.activeProjectId).kind);
   const activeProjectId = useWorkspace((s) => s.activeProjectId);
-  const screen = screenModeAt(progress, mode, activeProjectId);
+  const screen: ScreenMode =
+    kind === "project" ? { kind: "project", id: activeProjectId ?? "" } : { kind };
 
   return (
     <div
